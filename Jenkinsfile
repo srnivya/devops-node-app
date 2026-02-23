@@ -1,40 +1,46 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_CREDENTIALS = 'dockerhub-creds'
-        IMAGE_NAME = 'srnivya/devops-node-app'
-        GIT_CREDENTIALS = 'github-pat'
+        IMAGE_NAME = "srnivya/devops-node-app"
+        DOCKER_CREDENTIALS = "dockerhub-creds"
+        GIT_CREDENTIALS = "github-pat"
     }
+
     stages {
-        stage('Checkout') {
+
+        stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/srnivya/devops-node-app.git', credentialsId: "${GIT_CREDENTIALS}"
+                git branch: 'main',
+                    credentialsId: "${GIT_CREDENTIALS}",
+                    url: 'https://github.com/srnivya/devops-node-app.git'
             }
         }
-        stage('Build Node App') {
+
+        stage('Build Docker Image') {
             steps {
-                sh 'npm install'
-                sh 'npm test || echo "No tests or tests failed"'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
-        stage('Docker Build') {
-            steps {
-                sh "docker build -t ${IMAGE_NAME}:latest ."
-            }
-        }
-        stage('Docker Push') {
+
+        stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    sh "docker push ${IMAGE_NAME}:latest"
-                    sh 'docker logout'
+                    sh """
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $IMAGE_NAME
+                    """
                 }
             }
         }
-        stage('Deploy') {
+
+        stage('Run Container') {
             steps {
-                sh "docker rm -f devops-node-app || true"
-                sh "docker run -d -p 8080:8080 --name devops-node-app ${IMAGE_NAME}:latest"
+                sh '''
+                docker stop node-app || true
+                docker rm node-app || true
+                docker run -d -p 3000:3000 --name node-app $IMAGE_NAME
+                '''
             }
         }
     }
