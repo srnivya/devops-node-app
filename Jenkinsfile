@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS = 'dockerhub-creds'   // Jenkins Credentials ID
+        DOCKER_CREDENTIALS = 'dockerhub-creds'   // Jenkins Credentiials ID
         IMAGE_NAME = 'srnivya/devops-node-app'   // Docker Hub repo
         CONTAINER_NAME = 'devops-node-app'
     }
