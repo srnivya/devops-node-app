@@ -1,4 +1,5 @@
-                                                                        ** CI/CD Pipeline with Monitoring on AWS**
+     ** CI/CD Pipeline with Monitoring on AWS**
+     
 **📌 Project Description**
 
 This project demonstrates an end-to-end DevOps pipeline using Jenkins, Docker, and AWS EC2 with monitoring using Prometheus and Grafana.
